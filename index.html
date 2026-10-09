@@ -1,314 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Project GothamRP</title>
+<title>1980s Gotham Roleplay</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Special+Elite&display=swap" rel="stylesheet">
 <style>
-:root{
-  --gold:#c2a263; --gold-hi:#e3c98f; --gold-dim:#7d6a43; --ink:#050506; --smoke:#14120e; --paper:#d9cfb6;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:"Cormorant Garamond",Georgia,serif}
-canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
-#sky{z-index:0}
-#city{z-index:1}
-#rain{z-index:2}
-#grain{z-index:6;opacity:.14;mix-blend-mode:overlay;pointer-events:none}
-.vignette{position:fixed;inset:0;z-index:5;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 42%,rgba(0,0,0,0) 30%,rgba(0,0,0,.55) 70%,rgba(0,0,0,.92) 100%)}
-.tint{position:fixed;inset:0;z-index:4;pointer-events:none;background:linear-gradient(180deg,rgba(40,30,12,.25),rgba(0,0,0,0) 40%,rgba(20,14,6,.35));mix-blend-mode:multiply}
-.bars:before,.bars:after{content:"";position:fixed;left:0;right:0;height:7vh;background:#000;z-index:7}
-.bars:before{top:0}.bars:after{bottom:0}
-
-/* Title sequence */
-.stage{position:fixed;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none;transform:translateY(-6vh)}
-.presents{font-family:"Cinzel",serif;font-weight:400;letter-spacing:.62em;font-size:clamp(11px,1.05vw,16px);color:var(--gold-dim);text-transform:uppercase;
-  opacity:0;animation:rise 2.4s ease-out .6s forwards}
-.presents b{color:var(--gold);font-weight:600}
-.rule{width:0;height:1px;margin:2.2vh auto;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:rule 2.6s ease-out 1.6s forwards;opacity:.8}
-.project{font-family:"Cinzel",serif;font-weight:400;letter-spacing:.9em;font-size:clamp(12px,1.2vw,18px);color:var(--gold);opacity:0;animation:rise 2s ease-out 2.4s forwards;padding-left:.9em}
-.title{position:relative;font-family:"Cinzel",serif;font-weight:700;letter-spacing:.14em;line-height:.95;
-  font-size:clamp(54px,8.2vw,150px);margin-top:1.2vh;
-  background:linear-gradient(180deg,#f1dfb0 0%,#cfae6d 38%,#8d7340 62%,#d7b977 80%,#6f5a31 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 0 22px rgba(194,162,99,.18)) drop-shadow(0 6px 0 rgba(0,0,0,.6));
-  opacity:0;animation:titleIn 3.2s cubic-bezier(.2,.7,.2,1) 3s forwards, flicker 9s linear 7s infinite}
-.title .rp{font-size:.42em;letter-spacing:.3em;vertical-align:.95em;margin-left:.12em}
-.title:after{content:"";position:absolute;inset:0;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='.55'/></svg>");
-  mix-blend-mode:multiply;-webkit-background-clip:text;opacity:.35;pointer-events:none}
-.tagline{margin-top:2.6vh;font-style:italic;font-size:clamp(15px,1.45vw,23px);color:#b8ab8c;letter-spacing:.06em;opacity:0;animation:rise 2.4s ease-out 5.2s forwards}
-.year{margin-top:1.4vh;font-family:"Cinzel",serif;letter-spacing:.7em;font-size:clamp(10px,.9vw,13px);color:var(--gold-dim);opacity:0;animation:rise 2s ease-out 6s forwards;padding-left:.7em}
-
-/* Lower panel */
-.lower{position:fixed;left:0;right:0;bottom:calc(7vh + 3.2vh);z-index:9;display:flex;justify-content:center;pointer-events:none}
-.panel{width:min(760px,78vw);opacity:0;animation:rise 1.6s ease-out 4s forwards}
-.status{display:flex;justify-content:space-between;align-items:baseline;font-family:"Special Elite",monospace;font-size:clamp(11px,.85vw,13px);letter-spacing:.14em;color:#a79a7b;text-transform:uppercase}
-.status .pct{color:var(--gold)}
-.track{position:relative;height:2px;margin-top:10px;background:rgba(194,162,99,.14);overflow:hidden}
-.fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#6f5a31,var(--gold),#f0dca7);box-shadow:0 0 12px rgba(227,201,143,.55);transition:width .6s ease}
-.shimmer{position:absolute;top:0;bottom:0;width:18%;background:linear-gradient(90deg,transparent,rgba(255,240,200,.45),transparent);animation:shimmer 2.8s linear infinite}
-.file{margin-top:9px;font-family:"Special Elite",monospace;font-size:11px;letter-spacing:.08em;color:#6e6552;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:14px}
-.tip{margin-top:2.4vh;text-align:center;font-style:italic;font-size:clamp(14px,1.15vw,18px);color:#c9bc9b;min-height:1.4em;transition:opacity 1.2s ease}
-
-/* Corner cards */
-.corner{position:fixed;z-index:9;top:calc(7vh + 2.4vh);font-family:"Cinzel",serif;font-size:11px;letter-spacing:.32em;color:var(--gold-dim);text-transform:uppercase;opacity:0;animation:rise 2s ease-out 4.5s forwards}
-.corner.l{left:3vw}.corner.r{right:3vw;text-align:right}
-.corner strong{display:block;margin-top:6px;color:var(--gold);font-weight:600;letter-spacing:.2em;font-size:12px}
-.live{display:inline-block;width:7px;height:7px;border-radius:50%;background:#a3342a;margin-right:8px;box-shadow:0 0 8px #a3342a;animation:pulse 1.8s ease-in-out infinite;vertical-align:1px}
-
-/* The small television carrying the station's broadcast (YouTube player shown unaltered). */
-.tv{position:fixed;z-index:9;right:3vw;bottom:calc(7vh + 3vh);width:232px;padding:14px 14px 10px;background:linear-gradient(180deg,#1c1812,#0d0b08);
-  border:1px solid rgba(194,162,99,.35);box-shadow:0 18px 40px rgba(0,0,0,.7),inset 0 0 0 1px rgba(0,0,0,.6);border-radius:6px;opacity:0;animation:rise 2s ease-out 6.5s forwards}
-.tv .screen{width:204px;height:204px;background:#000;overflow:hidden;border-radius:3px}
-.tv .screen iframe{width:204px;height:204px;border:0;display:block}
-.tv .label{margin-top:8px;display:flex;justify-content:space-between;font-family:"Special Elite",monospace;font-size:10px;letter-spacing:.14em;color:#8c7f62}
-.tv .label span:last-child{color:var(--gold)}
-
-@keyframes rise{from{opacity:0;transform:translateY(12px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
-@keyframes rule{to{width:min(420px,40vw)}}
-@keyframes titleIn{0%{opacity:0;letter-spacing:.5em;filter:blur(14px)}60%{opacity:1}100%{opacity:1;letter-spacing:.14em;filter:drop-shadow(0 0 22px rgba(194,162,99,.18)) drop-shadow(0 6px 0 rgba(0,0,0,.6))}}
-@keyframes flicker{0%,100%{opacity:1}46%{opacity:1}47%{opacity:.72}48%{opacity:1}49%{opacity:.86}50%{opacity:1}}
-@keyframes shimmer{from{left:-20%}to{left:110%}}
-@keyframes pulse{50%{opacity:.35}}
+  :root { --img: url("cover.jpg"); }
+  html, body { margin: 0; height: 100%; background: #07080a; overflow: hidden; }
+  body { color: #e9e2d2; font-family: "Special Elite", "Courier New", monospace; }
+  .fill { position: fixed; inset: -40px; background: var(--img) center / cover no-repeat; filter: blur(28px) brightness(.35) saturate(.8); }
+  .art { position: fixed; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); height: 100%; width: 65.9vh;
+         background: var(--img) center / contain no-repeat; box-shadow: 0 0 80px 30px rgba(0,0,0,.65); }
+  .shade { position: fixed; inset: 0; background: linear-gradient(to top, rgba(4,5,7,.92) 0%, rgba(4,5,7,.55) 22%, rgba(4,5,7,0) 45%); }
+  .title { position: fixed; left: 0; right: 0; bottom: 9vh; text-align: center; }
+  .title h1 { margin: 0; font-family: "Oswald", sans-serif; font-weight: 600; font-size: 6.2vh; letter-spacing: .32em;
+              text-transform: uppercase; text-indent: .32em; color: #efe8d8; text-shadow: 0 2px 18px rgba(0,0,0,.9); }
+  .title h2 { margin: .6vh 0 0; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 2.1vh; letter-spacing: .55em;
+              text-indent: .55em; text-transform: uppercase; color: #b9afa0; }
+  .rule { width: 18vh; height: 1px; margin: 1.6vh auto; background: #8a2a22; }
+  .status { position: fixed; left: 0; right: 0; bottom: 3.2vh; text-align: center; font-size: 1.6vh; color: #9d9586; letter-spacing: .08em; }
+  .bar { width: 34vh; height: 2px; margin: 1vh auto 0; background: rgba(255,255,255,.12); }
+  .bar i { display: block; height: 100%; width: 0; background: #c9c0ad; transition: width .4s; }
 </style>
 </head>
-<body class="bars">
-<canvas id="sky"></canvas>
-<canvas id="city"></canvas>
-<canvas id="rain"></canvas>
-<div class="tint"></div>
-<div class="vignette"></div>
-<canvas id="grain"></canvas>
-
-<div class="corner l"><span class="live"></span>Now entering<strong id="mapname">Gotham City</strong></div>
-<div class="corner r">Precinct capacity<strong id="slots">— Citizens</strong></div>
-
-<div class="stage">
-  <div class="presents"><b>NexaNetworks</b> &nbsp;presents</div>
-  <div class="rule"></div>
-  <div class="project">Project</div>
-  <div class="title">GOTHAM<span class="rp">RP</span></div>
-  <div class="tagline">The city never sleeps. Neither do its sins.</div>
-  <div class="year">Serious Roleplay &nbsp;·&nbsp; MCMLXXXIX</div>
-</div>
-
-<div class="lower"><div class="panel">
-  <div class="status"><span id="status">Establishing connection</span><span class="pct" id="pct">0%</span></div>
-  <div class="track"><div class="fill" id="fill"></div><div class="shimmer"></div></div>
-  <div class="file" id="file"></div>
-  <div class="tip" id="tip"></div>
-</div></div>
-
-<div class="tv" id="tv">
-  <div class="screen"><div id="yt"></div></div>
-  <div class="label"><span>GOTHAM AFTER DARK</span><span>ON AIR</span></div>
-</div>
-
+<body>
+  <div class="fill"></div>
+  <div class="art"></div>
+  <div class="shade"></div>
+  <div class="title">
+    <h1>Gotham City</h1>
+    <div class="rule"></div>
+    <h2>1980s Roleplay</h2>
+  </div>
+  <div class="status"><span id="st">Connecting…</span><div class="bar"><i id="bar"></i></div></div>
 <script>
-/* ---------- settings ---------- */
-var MUSIC_VIDEO = "6jNTMGh5Ujc";   // Heavy Rain in Gotham City Ambience (oldies + rain). Alternative: "03FC9nMhTf8"
-var MUSIC_VOLUME = 55;             // 0-100, scaled by the player's in-game volume
-var SIRENS = true;                 // distant police sirens and thunder, generated live (no audio files)
-
-/* ---------- Garry's Mod hooks ---------- */
-var total = 0, needed = 0, gameVolume = 1, statusText = "Establishing connection";
-function setText(id, v){ var e=document.getElementById(id); if(e) e.textContent=v; }
-function progress(){
-  var p = total > 0 ? Math.max(0, Math.min(1, (total - needed) / total)) : 0;
-  document.getElementById("fill").style.width = (p*100).toFixed(1) + "%";
-  setText("pct", Math.round(p*100) + "%");
-}
-window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume){
-  if (maxplayers) setText("slots", maxplayers + " Citizens");
-  if (typeof volume === "number") { gameVolume = Math.max(0, Math.min(1, volume)); applyVolume(); }
-};
-window.SetFilesTotal = function(n){ total = n; progress(); };
-window.SetFilesNeeded = function(n){ needed = n; progress(); };
-window.DownloadingFile = function(f){ setText("file", "Retrieving  " + String(f).split("/").pop()); };
-window.SetStatusChanged = function(s){
-  statusText = String(s).replace(/\.\.\.$/, "");
-  setText("status", statusText);
-  if (/sending client info|lua|starting/i.test(s)) { needed = 0; if (!total) total = 1; progress(); }
-};
-
-/* ---------- rotating lines ---------- */
-var tips = [
-  "Gotham, 1989. Rain on the asphalt, smoke in the alleys.",
-  "Every face in this city has a story. Play yours with conviction.",
-  "The GCPD is stretched thin. Some nights, the city answers for itself.",
-  "Serious roleplay: stay in character, respect the scene, make it memorable.",
-  "The Iceberg Lounge keeps its doors open late. Mind who you owe.",
-  "Blüdhaven is only a bridge away. So is trouble.",
-  "Press F2 near a car for vehicle options. Hold R to put your weapon's safety on.",
-  "Look up when the clouds light. Someone may be calling for help."
-];
-var tipIndex = Math.floor(Math.random()*tips.length);
-function nextTip(){
-  var el = document.getElementById("tip");
-  el.style.opacity = 0;
-  setTimeout(function(){ el.textContent = tips[tipIndex++ % tips.length]; el.style.opacity = 1; }, 1200);
-}
-setTimeout(function(){ nextTip(); setInterval(nextTip, 9000); }, 4200);
-
-/* ---------- canvases ---------- */
-var W=0,H=0,DPR=Math.min(window.devicePixelRatio||1,1.5);
-var sky=document.getElementById("sky"), city=document.getElementById("city"), rain=document.getElementById("rain"), grain=document.getElementById("grain");
-var sx=sky.getContext("2d"), cx=city.getContext("2d"), rx=rain.getContext("2d"), gx=grain.getContext("2d");
-var buildings=[], windows=[], drops=[], beams=[], flash=0;
-function resize(){
-  W=window.innerWidth; H=window.innerHeight;
-  [sky,city,rain].forEach(function(c){ c.width=W*DPR; c.height=H*DPR; c.getContext("2d").setTransform(DPR,0,0,DPR,0,0); });
-  grain.width=Math.ceil(W/2); grain.height=Math.ceil(H/2);
-  buildSkyline(); buildRain();
-}
-function rnd(a,b){ return a+Math.random()*(b-a); }
-function buildSkyline(){
-  buildings=[]; windows=[];
-  var layers=[{h:.24,c:"#0d0c0a",dens:.25},{h:.31,c:"#090807",dens:.35},{h:.38,c:"#050504",dens:.45}];
-  layers.forEach(function(L,li){
-    var x=-20;
-    while(x<W+20){
-      var w=rnd(40,120)*(1+li*.25), h=rnd(.35,1)*L.h*H*(li==2?1.05:1);
-      var b={x:x,w:w,h:h,c:L.c,layer:li,spire:Math.random()<.12&&li>0};
-      buildings.push(b);
-      if (li>0) for (var wy=H-h+14; wy<H-10; wy+=rnd(11,15)) for (var wx=x+6; wx<x+w-8; wx+=rnd(9,13))
-        if (Math.random()<L.dens*.35) windows.push({x:wx,y:wy,on:Math.random()<.7,t:rnd(3,40),a:rnd(.25,.85),layer:li,warm:Math.random()<.85});
-      x+=w+rnd(-6,4);
-    }
-  });
-  beams=[{x:W*.18,a:-1.2,s:.0021,w:.05},{x:W*.74,a:-2.0,s:-.0016,w:.045}];
-}
-function buildRain(){
-  drops=[]; var n=Math.round(W*H/5200);
-  for(var i=0;i<n;i++) drops.push({x:rnd(0,W),y:rnd(0,H),l:rnd(9,22),v:rnd(620,980),a:rnd(.05,.2)});
-}
-function drawSky(t){
-  var g=sx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,"#07070a"); g.addColorStop(.55,"#15120d"); g.addColorStop(1,"#241c10");
-  sx.fillStyle=g; sx.fillRect(0,0,W,H);
-  // low cloud deck, lit from below by the city
-  for (var i=0;i<5;i++){
-    var y=H*(.12+i*.07), r=sx.createRadialGradient(W*(.5+Math.sin(t*.00004+i)*.3),y,10,W*.5,y,W*.8);
-    r.addColorStop(0,"rgba(120,96,56,"+(.05+.03*i)+")"); r.addColorStop(1,"rgba(0,0,0,0)");
-    sx.fillStyle=r; sx.fillRect(0,0,W,H);
-  }
-  // searchlights sweeping the clouds
-  beams.forEach(function(b){
-    b.a+=b.s*16; if(b.a<-2.3||b.a>-.85) b.s*=-1;
-    sx.save(); sx.translate(b.x,H); sx.rotate(b.a+Math.PI/2);
-    var lg=sx.createLinearGradient(0,0,0,-H*1.3);
-    lg.addColorStop(0,"rgba(230,210,160,.10)"); lg.addColorStop(1,"rgba(230,210,160,0)");
-    sx.fillStyle=lg; sx.beginPath(); sx.moveTo(-6,0); sx.lineTo(-H*1.3*b.w,-H*1.3); sx.lineTo(H*1.3*b.w,-H*1.3); sx.lineTo(6,0); sx.fill();
-    sx.restore();
-  });
-  if (flash>0){ sx.fillStyle="rgba(210,205,190,"+(flash*.35)+")"; sx.fillRect(0,0,W,H); flash*=.86; if(flash<.01) flash=0; }
-}
-function drawCity(t){
-  cx.clearRect(0,0,W,H);
-  buildings.forEach(function(b){
-    cx.fillStyle=b.c; cx.fillRect(b.x,H-b.h,b.w,b.h);
-    if (b.spire){ cx.beginPath(); cx.moveTo(b.x+b.w*.3,H-b.h); cx.lineTo(b.x+b.w*.5,H-b.h-b.w*.9); cx.lineTo(b.x+b.w*.7,H-b.h); cx.fill(); }
-  });
-  windows.forEach(function(w){
-    if (t/1000>w.t){ w.t=t/1000+rnd(4,60); if(Math.random()<.4) w.on=!w.on; }
-    if (!w.on) return;
-    cx.fillStyle=w.warm?"rgba(230,186,110,"+(w.a*(w.layer==2?1:.6))+")":"rgba(170,190,210,"+(w.a*.5)+")";
-    cx.fillRect(w.x,w.y,3,4);
-  });
-  // wet street glow
-  var s=cx.createLinearGradient(0,H*.86,0,H); s.addColorStop(0,"rgba(0,0,0,0)"); s.addColorStop(1,"rgba(160,120,60,.12)");
-  cx.fillStyle=s; cx.fillRect(0,H*.86,W,H*.14);
-}
-var last=performance.now();
-function drawRain(t){
-  var dt=Math.min(.05,(t-last)/1000); last=t;
-  rx.clearRect(0,0,W,H); rx.strokeStyle="rgba(200,190,160,1)"; rx.lineWidth=1;
-  drops.forEach(function(d){
-    d.y+=d.v*dt; d.x-=d.v*dt*.12;
-    if(d.y>H){ d.y=-d.l; d.x=rnd(0,W*1.1); }
-    rx.globalAlpha=d.a; rx.beginPath(); rx.moveTo(d.x,d.y); rx.lineTo(d.x+d.l*.12,d.y-d.l); rx.stroke();
-  });
-  rx.globalAlpha=1;
-}
-var grainData=null;
-function drawGrain(){
-  var w=grain.width,h=grain.height;
-  if(!grainData||grainData.width!==w) grainData=gx.createImageData(w,h);
-  var d=grainData.data;
-  for(var i=0;i<d.length;i+=4){ var v=Math.random()*255|0; d[i]=d[i+1]=d[i+2]=v; d[i+3]=255; }
-  gx.putImageData(grainData,0,0);
-}
-var frame=0;
-function loop(t){
-  drawSky(t); drawCity(t); drawRain(t);
-  if((frame++&1)==0) drawGrain();
-  requestAnimationFrame(loop);
-}
-window.addEventListener("resize",resize); resize(); requestAnimationFrame(loop);
-
-/* ---------- music: the station's broadcast on the little TV ---------- */
-var player=null;
-function applyVolume(){ if(player&&player.setVolume) player.setVolume(Math.round(MUSIC_VOLUME*gameVolume)); if(audio) audio.master.gain.value=.9*gameVolume; }
-window.onYouTubeIframeAPIReady=function(){
-  player=new YT.Player("yt",{width:204,height:204,videoId:MUSIC_VIDEO,
-    playerVars:{autoplay:1,controls:0,loop:1,playlist:MUSIC_VIDEO,modestbranding:1,rel:0,playsinline:1,iv_load_policy:3,start:Math.floor(Math.random()*1800)},
-    events:{onReady:function(e){ applyVolume(); e.target.playVideo(); },
-            onError:function(){ document.getElementById("tv").style.display="none"; }}});
-};
-(function(){ var s=document.createElement("script"); s.src="https://www.youtube.com/iframe_api"; document.head.appendChild(s); })();
-
-/* ---------- sirens and thunder, synthesised (no recordings) ---------- */
-var audio=null;
-function startAudio(){
-  if(!SIRENS||audio) return;
-  var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
-  var ctx=new AC(); var master=ctx.createGain(); master.gain.value=.9*gameVolume; master.connect(ctx.destination);
-  // simple long reverb from decaying noise: sells the distance between buildings
-  var len=ctx.sampleRate*3.2, ir=ctx.createBuffer(2,len,ctx.sampleRate);
-  for(var c=0;c<2;c++){ var ch=ir.getChannelData(c); for(var i=0;i<len;i++) ch[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6); }
-  var verb=ctx.createConvolver(); verb.buffer=ir; verb.connect(master);
-  audio={ctx:ctx,master:master,verb:verb};
-  scheduleSiren(6); scheduleThunder(14);
-}
-function scheduleSiren(delay){ setTimeout(function(){ siren(); scheduleSiren(rnd(22,48)); }, delay*1000); }
-function scheduleThunder(delay){ setTimeout(function(){ thunder(); scheduleThunder(rnd(30,70)); }, delay*1000); }
-function siren(){
-  var a=audio; if(!a) return; var ctx=a.ctx, t=ctx.currentTime, dur=rnd(9,15);
-  var osc=ctx.createOscillator(); osc.type="sawtooth";
-  var lp=ctx.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=1300; lp.Q.value=.7;
-  var bp=ctx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=900; bp.Q.value=.6;
-  var g=ctx.createGain(); g.gain.value=0;
-  var pan=ctx.createStereoPanner?ctx.createStereoPanner():null;
-  osc.connect(lp); lp.connect(bp); bp.connect(g);
-  var out=g; if(pan){ g.connect(pan); out=pan; pan.pan.setValueAtTime(rnd(-.9,.9),t); pan.pan.linearRampToValueAtTime(rnd(-.9,.9),t+dur); }
-  var dry=ctx.createGain(); dry.gain.value=.25; out.connect(dry); dry.connect(a.master); out.connect(a.verb);
-  // American "wail": slow rise and fall
-  var lo=rnd(620,700), hi=rnd(1250,1400), cyc=rnd(3.6,4.4);
-  osc.frequency.setValueAtTime(lo,t);
-  for(var s=0;s<dur;s+=cyc){ osc.frequency.linearRampToValueAtTime(hi,t+s+cyc*.45); osc.frequency.linearRampToValueAtTime(lo,t+s+cyc); }
-  // passes by in the distance: swell in, fade out, with a slight Doppler drop
-  var peak=rnd(.045,.075);
-  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(peak,t+dur*.45); g.gain.linearRampToValueAtTime(0,t+dur);
-  osc.detune.setValueAtTime(40,t); osc.detune.linearRampToValueAtTime(-60,t+dur);
-  osc.start(t); osc.stop(t+dur+.1);
-}
-function thunder(){
-  var a=audio; if(!a) return; var ctx=a.ctx, t=ctx.currentTime, dur=rnd(4,7);
-  var len=ctx.sampleRate*dur, buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0), last=0;
-  for(var i=0;i<len;i++){ last=(last+.02*(Math.random()*2-1))/1.02; d[i]=last*3.5; }
-  var src=ctx.createBufferSource(); src.buffer=buf;
-  var lp=ctx.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=rnd(160,260);
-  var g=ctx.createGain(); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(rnd(.35,.6),t+.25); g.gain.exponentialRampToValueAtTime(.001,t+dur);
-  src.connect(lp); lp.connect(g); g.connect(a.master); g.connect(a.verb);
-  src.start(t);
-  setTimeout(function(){ flash=1; setTimeout(function(){ flash=.7; },120); }, 0);
-}
-startAudio();
-// Some browsers only allow sound after a click; Garry's Mod does not, but this keeps it working elsewhere.
-window.addEventListener("click",function(){ startAudio(); if(audio&&audio.ctx.state==="suspended") audio.ctx.resume(); if(player&&player.playVideo) player.playVideo(); });
+  var total = 0, needed = 0;
+  function setText(t) { document.getElementById("st").textContent = t; }
+  function progress() { if (total > 0) document.getElementById("bar").style.width = Math.max(0, Math.min(100, (1 - needed / total) * 100)) + "%"; }
+  // Garry's Mod calls these while you join
+  function GameDetails(server, url, map, maxp, steamid, gamemode) { setText("Arriving in Gotham…"); }
+  function SetFilesTotal(t) { total = t; progress(); }
+  function SetFilesNeeded(n) { needed = n; progress(); }
+  function DownloadingFile(f) { setText("Downloading " + String(f).split("/").pop()); }
+  function SetStatusChanged(s) { setText(s); if (/sending client info/i.test(s)) { needed = 0; progress(); } }
 </script>
 </body>
 </html>
